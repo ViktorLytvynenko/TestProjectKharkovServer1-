@@ -114,6 +114,7 @@ router.delete("/:id", (req, res) => {
     res.status(200).json({success: true, data: deleted});
 });
 
+
 router.post("/", (req, res) => {
     const { name, products } = req.body;
 
@@ -121,11 +122,22 @@ router.post("/", (req, res) => {
         return res.status(400).json({ success: false, message: "Invalid data" });
     }
 
+    const fullProducts = products.map((p) => {
+        const productFromDB = productsDB.find((prod) => prod.id === p.id);
+        if (!productFromDB) {
+            throw new Error(`Product with id ${p.id} not found`);
+        }
+        return {
+            ...productFromDB,
+            quantity: p.quantity,
+        };
+    });
+
     const newArrival = {
         id: arrivals.length ? arrivals[arrivals.length - 1].id + 1 : 1,
         name,
-        products,
-        quantity: products.length,
+        products: fullProducts,
+        quantity: fullProducts.reduce((sum, p) => sum + p.quantity, 0),
         date: Date.now(),
     };
 
