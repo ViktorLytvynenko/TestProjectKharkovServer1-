@@ -117,36 +117,39 @@ router.delete("/:id", (req, res) => {
 
 router.post("/", (req, res) => {
     const { name, products } = req.body;
+    console.log("Incoming request:", req.body);
 
     if (!name || !products || !Array.isArray(products)) {
         return res.status(400).json({ success: false, message: "Invalid data" });
     }
 
-    const fullProducts = products.map((p) => {
-        const productFromDB = productsDB.find((prod) => prod.id === p.id);
-        if (!productFromDB) {
-            throw new Error(`Product with id ${p.id} not found`);
-        }
-        return {
-            ...productFromDB,
-            quantity: p.quantity,
+    try {
+        const fullProducts = products.map((p) => {
+            const productFromDB = productsDB.find((prod) => prod.id === p.id);
+            if (!productFromDB) {
+                throw new Error(`Product with id ${p.id} not found`);
+            }
+            return {
+                ...productFromDB,
+                quantity: p.quantity,
+            };
+        });
+
+        const newArrival = {
+            id: arrivals.length ? arrivals[arrivals.length - 1].id + 1 : 1,
+            name,
+            products: fullProducts,
+            quantity: fullProducts.reduce((sum, p) => sum + p.quantity, 0),
+            date: Date.now(),
         };
-    });
 
-    const newArrival = {
-        id: arrivals.length ? arrivals[arrivals.length - 1].id + 1 : 1,
-        name,
-        products: fullProducts,
-        quantity: fullProducts.reduce((sum, p) => sum + p.quantity, 0),
-        date: Date.now(),
-    };
+        arrivals.push(newArrival);
 
-    arrivals.push(newArrival);
-
-    res.status(201).json({
-        success: true,
-        data: newArrival,
-    });
+        res.status(201).json({ success: true, data: newArrival });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
 });
 
 export default router;
