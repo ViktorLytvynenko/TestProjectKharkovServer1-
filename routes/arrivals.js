@@ -118,11 +118,11 @@ router.delete("/:id", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-    const { name, products } = req.body;
+    const {name, products} = req.body;
     console.log("Incoming request:", req.body);
 
-    if (!name || !products || !Array.isArray(products)) {
-        return res.status(400).json({ success: false, message: "Invalid data" });
+    if (!name || !products || !Array.isArray(products) || products.length === 0) {
+        return res.status(400).json({success: false, message: "Invalid data"});
     }
 
     try {
@@ -133,12 +133,10 @@ router.post("/", (req, res) => {
             if (!productFromDB) {
                 throw new Error(`Product with id ${p.id} not found`);
             }
-            return {
-                ...productFromDB,
-            };
+            return {...productFromDB};
         });
 
-        const totalQuantity = products.reduce((sum, p) => sum + (p.quantity || 0), 0);
+        const totalQuantity = products.length;
 
         const newArrival = {
             id: arrivals.length ? arrivals[arrivals.length - 1].id + 1 : 1,
@@ -150,10 +148,10 @@ router.post("/", (req, res) => {
 
         arrivals.push(newArrival);
 
-        res.status(201).json({ success: true, data: newArrival });
+        res.status(201).json({success: true, data: newArrival});
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({success: false, message: (error).message});
     }
 });
 
