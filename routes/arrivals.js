@@ -1,4 +1,4 @@
-import { Router } from "express";
+import {Router} from "express";
 
 const router = Router();
 
@@ -99,6 +99,41 @@ router.get("/", (req, res) => {
     res.status(200).json({
         success: true,
         data: arrivals
+    });
+});
+
+router.delete("/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    const index = arrivals.findIndex((a) => a.id === id);
+
+    if (index === -1) {
+        return res.status(404).json({success: false, message: "Arrival not found"});
+    }
+
+    const deleted = arrivals.splice(index, 1)[0];
+    res.status(200).json({success: true, data: deleted});
+});
+
+router.post("/", (req, res) => {
+    const { name, products } = req.body;
+
+    if (!name || !products || !Array.isArray(products)) {
+        return res.status(400).json({ success: false, message: "Invalid data" });
+    }
+
+    const newArrival = {
+        id: arrivals.length ? arrivals[arrivals.length - 1].id + 1 : 1,
+        name,
+        products,
+        quantity: products.length,
+        date: Date.now(),
+    };
+
+    arrivals.push(newArrival);
+
+    res.status(201).json({
+        success: true,
+        data: newArrival,
     });
 });
 

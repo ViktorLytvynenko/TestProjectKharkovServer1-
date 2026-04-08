@@ -164,4 +164,16 @@ router.get("/", (req, res) => {
     });
 });
 
+router.delete("/:id", (req, res) => {
+    const productId = parseInt(req.params.id);
+    const index = products.findIndex(p => p.id === productId);
+
+    if (index === -1) {
+        return res.status(404).json({success: false, message: "Product not found"});
+    }
+
+    products.splice(index, 1);
+    res.status(200).json({success: true, message: "Product deleted"});
+});
+
 export default router;
