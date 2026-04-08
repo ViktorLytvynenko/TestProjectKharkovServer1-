@@ -95,10 +95,13 @@ const arrivals = [
     }
 ];
 
+const getAllProducts = () =>
+    arrivals.flatMap((arrival) => arrival.products);
+
 router.get("/", (req, res) => {
     res.status(200).json({
         success: true,
-        data: arrivals
+        data: arrivals,
     });
 });
 
@@ -114,18 +117,19 @@ router.delete("/:id", (req, res) => {
     res.status(200).json({success: true, data: deleted});
 });
 
-
 router.post("/", (req, res) => {
-    const { name, products } = req.body;
+    const {name, products} = req.body;
     console.log("Incoming request:", req.body);
 
     if (!name || !products || !Array.isArray(products)) {
-        return res.status(400).json({ success: false, message: "Invalid data" });
+        return res.status(400).json({success: false, message: "Invalid data"});
     }
 
     try {
+        const allProducts = getAllProducts();
+
         const fullProducts = products.map((p) => {
-            const productFromDB = productsDB.find((prod) => prod.id === p.id);
+            const productFromDB = allProducts.find((prod) => prod.id === p.id);
             if (!productFromDB) {
                 throw new Error(`Product with id ${p.id} not found`);
             }
@@ -145,10 +149,10 @@ router.post("/", (req, res) => {
 
         arrivals.push(newArrival);
 
-        res.status(201).json({ success: true, data: newArrival });
+        res.status(201).json({success: true, data: newArrival});
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({success: false, message: error.message});
     }
 });
 
