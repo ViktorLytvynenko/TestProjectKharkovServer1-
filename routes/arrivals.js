@@ -118,11 +118,11 @@ router.delete("/:id", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-    const {name, products} = req.body;
+    const { name, products } = req.body;
     console.log("Incoming request:", req.body);
 
     if (!name || !products || !Array.isArray(products)) {
-        return res.status(400).json({success: false, message: "Invalid data"});
+        return res.status(400).json({ success: false, message: "Invalid data" });
     }
 
     try {
@@ -135,24 +135,25 @@ router.post("/", (req, res) => {
             }
             return {
                 ...productFromDB,
-                quantity: p.quantity,
             };
         });
+
+        const totalQuantity = products.reduce((sum, p) => sum + (p.quantity || 0), 0);
 
         const newArrival = {
             id: arrivals.length ? arrivals[arrivals.length - 1].id + 1 : 1,
             name,
             products: fullProducts,
-            quantity: fullProducts.reduce((sum, p) => sum + p.quantity, 0),
+            quantity: totalQuantity,
             date: Date.now(),
         };
 
         arrivals.push(newArrival);
 
-        res.status(201).json({success: true, data: newArrival});
+        res.status(201).json({ success: true, data: newArrival });
     } catch (error) {
         console.error(error);
-        res.status(500).json({success: false, message: error.message});
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 
