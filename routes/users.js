@@ -28,7 +28,7 @@ const users = [
     },
 ];
 
-router.get("/users/:id", (req, res) => {
+router.get("/:id", (req, res) => {
     const id = Number(req.params.id);
     const user = users.find(u => u.id === id);
 
